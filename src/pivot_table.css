@@ -1,0 +1,50 @@
+.pivot-table table {
+  background-color: white;
+  width: auto; }
+  .pivot-table table tr td, .pivot-table table tr th {
+    min-width: 100px;
+    width: 100px;
+    min-height: 20px;
+    height: 20px;
+    padding: 5px; }
+  .pivot-table table th {
+    background: #f3f3f3;
+    color: black; }
+.pivot-table-header {
+  width: 510px;
+  height: 32px;
+  margin-left: 112px;
+  overflow: hidden; }
+  .pivot-table-header tr:first-child th {
+    border-top: 1px solid #cac6c6; }
+  .pivot-table-header tr:last-child th {
+    border-bottom: none; }
+  .pivot-table-header tr th:first-child {
+    border-left: 1px solid #cac6c6; }
+  .pivot-table-header th {
+    border-bottom: 1px solid #cac6c6;
+    border-right: 1px solid #cac6c6; }
+.pivot-table-sidebar {
+  width: 113px;
+  height: 310px;
+  float: left;
+  overflow: hidden; }
+  .pivot-table-sidebar tr:first-child th {
+    border-top: 1px solid #cac6c6; }
+  .pivot-table-sidebar tr th:first-child {
+    border-left: 1px solid #cac6c6; }
+  .pivot-table-sidebar th {
+    border-right: 1px solid #cac6c6;
+    border-bottom: 1px solid #cac6c6; }
+.pivot-table-body {
+  overflow: auto;
+  width: 510px;
+  height: 310px;
+  float: left; }
+  .pivot-table-body tr:first-child td {
+    border-top: 1px solid #cac6c6; }
+  .pivot-table-body td {
+    border-bottom: 1px solid #cac6c6;
+    border-right: 1px solid #cac6c6; }
+
+/*# sourceMappingURL=pivot_table.css.map */
