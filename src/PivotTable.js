@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
+import PropTypes from 'prop-types';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import './pivot_table.css';
 
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 // let get_range = (end, start = 1) => {
 //     let result = [];
@@ -106,6 +107,11 @@ class PivotTable extends Component {
         this.state = {
             trees: trees,
             trees_map: create_map(trees, 'code'),
+            heads_measures: ['regions'],
+            sides_measures: ['years'],
+
+            header_rows_count: 1,
+            sidebar_cols_count: 2,
         };
     }
 
@@ -117,10 +123,11 @@ class PivotTable extends Component {
             tree.childs = [];
         }
         tree.hidden = typeof tree.hidden !== 'undefined' ? tree.hidden : true;
+        tree.hidden_childs = true;
+
         tree.lvl = lvl;
         tree.code = tree.code ? tree.code : tree.name;
         tree.has_childs = tree.childs.length > 0;
-        tree.hidden_childs = true;
 
         return tree;
     };
@@ -155,13 +162,18 @@ class PivotTable extends Component {
         let heads_measure = 'regions',
             sides_measure = 'years',
             heads = this.getTreeIterator(this.state.trees[this.state.trees_map[heads_measure]]).filter(measure => !measure.hidden),
-            sides = this.getTreeIterator(this.state.trees[this.state.trees_map[sides_measure]]).filter(measure => !measure.hidden);
+            sides = this.getTreeIterator(this.state.trees[this.state.trees_map[sides_measure]]).filter(measure => !measure.hidden),
+            headers_rows_count = this.state.heads_measures.length,
+            sidebar_cols_count = this.state.sides_measures.length;
 
         console.log('heads', heads);
         console.log('sides', sides);
         return (
             <div className="pivot-table" id="demo">
-                <header className="pivot-table-header">
+                <header className="pivot-table-header" style={{
+                    marginLeft: (110 * sidebar_cols_count + 2) + "px",
+                    height: (30 * headers_rows_count + 2) + "px",
+                }}>
                     <table cellSpacing={0}>
                         <thead>
                         <tr>
@@ -188,7 +200,7 @@ class PivotTable extends Component {
                         </thead>
                     </table>
                 </header>
-                <aside className="pivot-table-sidebar">
+                <aside className="pivot-table-sidebar" style={{width: (110 * sidebar_cols_count + 3) + 'px'}}>
                     <table cellSpacing={0}>
                         <tbody>
                         {sides.map((cell, i) => {
@@ -279,5 +291,13 @@ class PivotTable extends Component {
         console.info('click - toggleChilds - result ', new_trees)
     }
 }
+
+PivotTable.defaultProps = {
+
+};
+
+PivotTable.propTypes = {
+
+};
 
 export default PivotTable;

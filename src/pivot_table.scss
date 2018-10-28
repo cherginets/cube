@@ -1,9 +1,8 @@
 $th-border-color: #cac6c6;
-$th-border-width: 1px;
-$th-border: $th-border-width solid $th-border-color;
+$th-border: 1px solid $th-border-color;
 
-$sidebar-cols-count: 1;
-$header-rows-count: 1;
+//$sidebar-cols-count: 1;
+//$header-rows-count: 1;
 
 .pivot-table {
   table {
@@ -23,8 +22,8 @@ $header-rows-count: 1;
   }
   &-header {
     width: 510px;
-    height: 30px * $header-rows-count + 2 * $th-border-width;
-    margin-left: 110px * $sidebar-cols-count + 2 * $th-border-width;
+    //height: 30px * $header-rows-count + 2;
+    //margin-left: 110px * $sidebar-cols-count + 2;
     overflow: hidden;
     tr:first-child th {
       border-top: $th-border;
@@ -41,7 +40,7 @@ $header-rows-count: 1;
     }
   }
   &-sidebar {
-    width: 110px * $sidebar-cols-count + $th-border-width * 3;
+    //width: 110px * $sidebar-cols-count + 3px;
     height: 310px;
     float: left;
     overflow: hidden;

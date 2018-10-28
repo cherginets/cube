@@ -12,8 +12,6 @@
     color: black; }
 .pivot-table-header {
   width: 510px;
-  height: 32px;
-  margin-left: 112px;
   overflow: hidden; }
   .pivot-table-header tr:first-child th {
     border-top: 1px solid #cac6c6; }
@@ -25,7 +23,6 @@
     border-bottom: 1px solid #cac6c6;
     border-right: 1px solid #cac6c6; }
 .pivot-table-sidebar {
-  width: 113px;
   height: 310px;
   float: left;
   overflow: hidden; }
