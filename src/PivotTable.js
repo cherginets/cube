@@ -216,20 +216,28 @@ class PivotTable extends Component {
             });
             return tmp_trs;
         };
-        let get_trs = (tree) => {
-            // debugger;
+        let get_trs = (tree, param_length = 1) => {
             let trs = [];
-            if(tree._subtree) {
-                trs = get_trs(tree._subtree);
-                console.log(tree._subtree);
-                let length = this.tree_get_length(tree._subtree);
-                trs[0].tds.unshift({...tree, rowSpan: length});
-            } else {
-                // debugger;
-                trs.push({tds: [tree]})
-                trs = trs.concat(tree.childs.map(child => ({tds: [child]})));
+            if(tree.hidden) {
+                return trs;
             }
-            console.log('get_trs', tree);
+            if(tree._subtree) {
+                trs = get_trs(tree._subtree, length);
+                trs = copy(trs);
+                let length = this.tree_get_length(tree._subtree, (tree) => !tree.hidden);
+                length = length * param_length;
+                trs[0].tds.unshift({...tree, rowSpan: length});
+                tree.childs
+                    .filter((child) => !child.hidden)
+                    .forEach(child => (trs = trs.concat(get_trs(child)))
+                )
+            } else {
+                trs.push({tds: [tree]})
+                trs = trs.concat(tree.childs
+                    .filter((child) => !child.hidden)
+                    .map(child => ({tds: [child]}))
+                );
+            }
             return trs;
         }
         let trs = [];
@@ -396,10 +404,12 @@ class PivotTable extends Component {
         tree.childs = tree.childs.map(child => this.tree_iterator_with_childs(child, callback));
         return tree;
     }
-    tree_get_length(tree) {
+    tree_get_length(tree, filter = () => true) {
         let length = 0;
         this.tree_iterator_with_childs(tree, (child) => {
-            length++;
+            if(filter(child)) {
+                length++;
+            }
             return child;
         });
         return length;
