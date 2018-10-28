@@ -9,7 +9,8 @@
     padding: 5px; }
   .pivot-table table th {
     background: #f3f3f3;
-    color: black; }
+    color: black;
+    font-size: 12px; }
 .pivot-table-header {
   width: 510px;
   overflow: hidden; }
