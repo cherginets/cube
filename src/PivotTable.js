@@ -35,6 +35,7 @@ class PivotTable extends Component {
                     childs: [
                         {
                             name: "Russia",
+                            hidden: false,
                             childs: [
                                 {
                                     name: "Moscow",
@@ -49,6 +50,7 @@ class PivotTable extends Component {
                         },
                         {
                             name: "USA",
+                            hidden: false,
                             childs: [
                                 {
                                     name: "California",
@@ -60,6 +62,7 @@ class PivotTable extends Component {
                         },
                         {
                             name: "Georgia",
+                            hidden: false,
                         }
                     ]
                 },
@@ -170,8 +173,8 @@ class PivotTable extends Component {
 
         return result_tree;
     };
-    getTrsSide = (tree_side) => {
-        let get_trs = (tree, callback) => {
+    getTrsSide = () => {
+        let get_trs = (tree) => {
             let tmp_trs = [];
             this.getTreeIterator(tree, (subtree) => {
                 tmp_trs.push({tds: [{text: subtree.name}]});
@@ -180,7 +183,6 @@ class PivotTable extends Component {
         };
         let trs = [];
         for( let i = this.state.sides_measures.length - 1; i >= 0; i--) {
-            console.log('cycle', i)
             let cur_trs = get_trs(this.state.trees[this.state.trees_map[this.state.sides_measures[i]]]);
             if(trs.length === 0) {
                 trs = cur_trs;
@@ -188,76 +190,15 @@ class PivotTable extends Component {
                 let new_trs = [];
                 cur_trs.forEach(tr => {
                     let tmp_trs = copy(trs);
-                    console.log('cur_trs', cur_trs);
                     tmp_trs[0].tds.unshift({...tr.tds[0], rowspan: tmp_trs.length});
-                    // trs[0].unshift({td: })
                     new_trs = new_trs.concat(tmp_trs)
                 });
                 trs = new_trs;
             }
-            console.log('tmp_trs', cur_trs);
         }
-        console.log('trs', trs);
 
         return trs;
-        this.getTreeIterator(tree_side, (tree) => {
-            let subtree_length = 0;
-            this.getTreeIterator(tree._subtree, (subtree) => {
-                if(subtree._subtree) {
-
-                    return true;
-                }
-                subtree_length++;
-                // tmp_trs.push({tds: [{text: subtree.name}]})
-            });
-
-
-        });
-
-        return trs;
-        return [
-            {//tr
-                tds: [
-                    {
-                        rowspan: 3,
-                        text: 1,
-                    },
-                    {
-                        rowspan: 2,
-                        text: 1,
-                    },
-                    {
-                        text: 'all',
-                    }
-                ]
-            },
-            {//tr
-                tds: [
-                    {
-                        text: 'all',
-                    }
-                ]
-            },
-            {//tr
-                tds: [
-                    {
-                        rowspan: 2,
-                        text: 1,
-                    },
-                    {
-                        text: 'all',
-                    }
-                ]
-            },
-            {//tr
-                tds: [
-                    {
-                        text: 'all',
-                    }
-                ]
-            },
-        ]
-    }
+    };
     render() {
         // console.info('this.state', this.state);
 
@@ -269,7 +210,7 @@ class PivotTable extends Component {
             sidebar_cols_count = this.state.sides_measures.length;
 
         let tree_side = this.getFullStateTree(this.state.sides_measures);
-        let trs_side = this.getTrsSide(tree_side);
+        let trs_side = this.getTrsSide();
         console.log('tree_side', tree_side);
         console.log('trs_side', trs_side);
 
@@ -315,15 +256,17 @@ class PivotTable extends Component {
                                 {tr.tds.map((td,j) => {
                                     return <th rowSpan={td.rowspan} key={j}>
                                         {td.text}
+                                        <span style={{marginLeft: "7px"}}>
+                                        {td.has_childs ? (!td.hidden_childs ?
+                                            <FontAwesomeIcon icon={"caret-down"}/> :
+                                            <FontAwesomeIcon icon={"caret-up"}/>) :
+                                            false}
+                                        </span>
                                     </th>
                                 })}
                                 {/*<th onClick={this.toggleChilds.bind(this, sides_measure, side.code)}>*/}
                                     {/*{side.name}*/}
-                                    {/*<span style={{marginLeft: "7px"}}>*/}
-                                        {/*{side.has_childs ? (!side.hidden_childs ?*/}
-                                            {/*<FontAwesomeIcon icon={"caret-down"}/> :*/}
-                                            {/*<FontAwesomeIcon icon={"caret-up"}/>) : false}*/}
-                                        {/*</span>*/}
+
                                 {/*</th>*/}
                             </tr>;
                         })}
