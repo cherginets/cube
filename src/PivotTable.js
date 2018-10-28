@@ -115,10 +115,8 @@ class PivotTable extends Component {
         let init_list_measures_head = ['regions'],
             init_list_measures_side = ['years', 'products', 'scenarios'],
             measures_side = init_list_measures_side.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
-            measures_side_map = create_map(measures_side, 'code')
+            measures_side_map = create_map(measures_side, 'code');
 
-        console.log('measures_side', measures_side);
-        console.log('measures_side_map', measures_side_map);
         this.state = {
             trees: this.init_trees,
             trees_map: this.init_trees_map,
@@ -129,8 +127,38 @@ class PivotTable extends Component {
 
             measures_side: measures_side,
             measures_side_map: measures_side_map,
+            measures_side_tree: this.getFullTree(init_list_measures_side),
         };
     }
+    buildMeasureTree = (measures) => {
+        console.log('buildMeasureTree', measures)
+        let result = {}, ref_trees = {};
+        //building ref trees
+        measures.forEach(measure => {
+            ref_trees[measure.code] = {};
+            this.getTreeIterator(measure, (tree) => {
+                ref_trees[measure.code][tree.code] = tree;
+            })
+        });
+        // debugger;
+        for(let i = measures.length - 2; i >= 0; i--) {
+            console.log('cycle', measures[i], ref_trees[measures[i+1].code]);
+        }
+        console.log('ref_trees', ref_trees)
+        return {
+            years: {
+                products:
+                    {
+                        paper: {},
+                        tables: {},
+                        pencils: {},
+                    }
+            },
+            2018: {},
+            2017: {},
+            2016: {},
+        }
+    };
 
     prepareTree = (tree, lvl = 0, path = []) => {
         tree.path = path;
@@ -178,6 +206,7 @@ class PivotTable extends Component {
     }
 
     getTrsSide = () => {
+        console.log('getTrsSide', this.state.measures_side_tree);
         let get_visible_trs = (tree) => {
             let tmp_trs = [];
             this.getTreeIterator(tree, (subtree) => {
@@ -187,8 +216,30 @@ class PivotTable extends Component {
             });
             return tmp_trs;
         };
+        let get_trs = (tree) => {
+            // debugger;
+            let trs = [];
+            if(tree._subtree) {
+                trs = get_trs(tree._subtree);
+                console.log(tree._subtree);
+                let length = this.tree_get_length(tree._subtree);
+                trs[0].tds.unshift({...tree, rowSpan: length});
+            } else {
+                // debugger;
+                trs.push({tds: [tree]})
+                trs = trs.concat(tree.childs.map(child => ({tds: [child]})));
+            }
+            console.log('get_trs', tree);
+            return trs;
+        }
         let trs = [];
+        trs = get_trs(this.state.measures_side_tree);
+        console.log('new_trs', trs);
+        return trs;
+
+        trs = [];
         for( let i = this.state.measures_side.length - 1; i >= 0; i--) {
+            // let cur_trs = get_visible_trs(this.state.measures_side_tree[i]);
             let cur_trs = get_visible_trs(this.state.measures_side[i]);
             if(trs.length === 0) {
                 trs = cur_trs;
@@ -349,25 +400,26 @@ class PivotTable extends Component {
         let length = 0;
         this.tree_iterator_with_childs(tree, (child) => {
             length++;
+            return child;
         });
         return length;
     }
 
     //неиспользуется
-    // getFullStateTree = (measures) => {
-    //     let result_tree = this.state.trees[this.state.trees_map[measures[0]]];
-    //
-    //     if(measures[1]) {
-    //         result_tree = this.tree_iterator_with_childs(result_tree, (tree) => {
-    //             return {
-    //                 ...tree,
-    //                 _subtree: this.getFullStateTree(measures.slice(1,measures.length))
-    //             }
-    //         });
-    //     }
-    //
-    //     return result_tree;
-    // };
+    getFullTree = (measures) => {
+        let result_tree = this.init_trees[this.init_trees_map[measures[0]]];
+
+        if(measures[1]) {
+            result_tree = this.tree_iterator_with_childs(result_tree, (tree) => {
+                return {
+                    ...tree,
+                    _subtree: this.getFullTree(measures.slice(1,measures.length))
+                }
+            });
+        }
+
+        return result_tree;
+    };
 }
 
 PivotTable.defaultProps = {
