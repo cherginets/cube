@@ -5,17 +5,20 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import './pivot_table.css';
 
 
-// let get_range = (end, start = 1) => {
-//     let result = [];
-//     for (let i = start; i <= end; i++) {
-//         result.push(i)
-//     }
-//     return result;
-// };
+let get_range = (end, start = 1) => {
+    let result = [];
+    for (let i = start; i <= end; i++) {
+        result.push(i)
+    }
+    return result;
+};
 let create_map = (array, key) => {
     let result = {};
     array.forEach((item, i) => result[item[key]] = i)
     return result;
+};
+let copy = (obj) => {
+    return JSON.parse(JSON.stringify(obj));
 };
 
 class PivotTable extends Component {
@@ -80,10 +83,11 @@ class PivotTable extends Component {
                     name: "All years",
                     code: "years",
                     hidden: false,
+                    hidden_childs: false,
                     childs: [
-                        {name: "2018", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
-                        {name: "2017", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
-                        {name: "2016", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2018", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2017", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2016", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
                     ]
                 }
             },
@@ -108,10 +112,7 @@ class PivotTable extends Component {
             trees: trees,
             trees_map: create_map(trees, 'code'),
             heads_measures: ['regions'],
-            sides_measures: ['years'],
-
-            header_rows_count: 1,
-            sidebar_cols_count: 2,
+            sides_measures: ['years', 'products', 'scenarios'],
         };
     }
 
@@ -123,7 +124,7 @@ class PivotTable extends Component {
             tree.childs = [];
         }
         tree.hidden = typeof tree.hidden !== 'undefined' ? tree.hidden : true;
-        tree.hidden_childs = true;
+        tree.hidden_childs = typeof tree.hidden_childs !== 'undefined' ? tree.hidden_childs : true;
 
         tree.lvl = lvl;
         tree.code = tree.code ? tree.code : tree.name;
@@ -155,9 +156,110 @@ class PivotTable extends Component {
         };
         new fixedTable($('#demo'));
     }
+    getFullStateTree = (measures) => {
+        let result_tree = this.state.trees[this.state.trees_map[measures[0]]];
 
+        if(measures[1]) {
+            result_tree = this.tree_iterator_with_childs(result_tree, (tree) => {
+                return {
+                    ...tree,
+                    _subtree: this.getFullStateTree(measures.slice(1,measures.length))
+                }
+            });
+        }
+
+        return result_tree;
+    };
+    getTrsSide = (tree_side) => {
+        let get_trs = (tree, callback) => {
+            let tmp_trs = [];
+            this.getTreeIterator(tree, (subtree) => {
+                tmp_trs.push({tds: [{text: subtree.name}]});
+            });
+            return tmp_trs;
+        };
+        let trs = [];
+        for( let i = this.state.sides_measures.length - 1; i >= 0; i--) {
+            console.log('cycle', i)
+            let cur_trs = get_trs(this.state.trees[this.state.trees_map[this.state.sides_measures[i]]]);
+            if(trs.length === 0) {
+                trs = cur_trs;
+            } else {
+                let new_trs = [];
+                cur_trs.forEach(tr => {
+                    let tmp_trs = copy(trs);
+                    console.log('cur_trs', cur_trs);
+                    tmp_trs[0].tds.unshift({...tr.tds[0], rowspan: tmp_trs.length});
+                    // trs[0].unshift({td: })
+                    new_trs = new_trs.concat(tmp_trs)
+                });
+                trs = new_trs;
+            }
+            console.log('tmp_trs', cur_trs);
+        }
+        console.log('trs', trs);
+
+        return trs;
+        this.getTreeIterator(tree_side, (tree) => {
+            let subtree_length = 0;
+            this.getTreeIterator(tree._subtree, (subtree) => {
+                if(subtree._subtree) {
+
+                    return true;
+                }
+                subtree_length++;
+                // tmp_trs.push({tds: [{text: subtree.name}]})
+            });
+
+
+        });
+
+        return trs;
+        return [
+            {//tr
+                tds: [
+                    {
+                        rowspan: 3,
+                        text: 1,
+                    },
+                    {
+                        rowspan: 2,
+                        text: 1,
+                    },
+                    {
+                        text: 'all',
+                    }
+                ]
+            },
+            {//tr
+                tds: [
+                    {
+                        text: 'all',
+                    }
+                ]
+            },
+            {//tr
+                tds: [
+                    {
+                        rowspan: 2,
+                        text: 1,
+                    },
+                    {
+                        text: 'all',
+                    }
+                ]
+            },
+            {//tr
+                tds: [
+                    {
+                        text: 'all',
+                    }
+                ]
+            },
+        ]
+    }
     render() {
-        console.info('this.state', this.state);
+        // console.info('this.state', this.state);
 
         let heads_measure = 'regions',
             sides_measure = 'years',
@@ -166,8 +268,13 @@ class PivotTable extends Component {
             headers_rows_count = this.state.heads_measures.length,
             sidebar_cols_count = this.state.sides_measures.length;
 
-        console.log('heads', heads);
-        console.log('sides', sides);
+        let tree_side = this.getFullStateTree(this.state.sides_measures);
+        let trs_side = this.getTrsSide(tree_side);
+        console.log('tree_side', tree_side);
+        console.log('trs_side', trs_side);
+
+        // console.log('heads', heads);
+        // console.log('sides', sides);
         return (
             <div className="pivot-table" id="demo">
                 <header className="pivot-table-header" style={{
@@ -203,21 +310,21 @@ class PivotTable extends Component {
                 <aside className="pivot-table-sidebar" style={{width: (110 * sidebar_cols_count + 3) + 'px'}}>
                     <table cellSpacing={0}>
                         <tbody>
-                        {sides.map((cell, i) => {
-                            let caret = false;
-
-                            if (cell.has_childs) {
-                                if (!cell.hidden_childs) {
-                                    caret = <FontAwesomeIcon icon={"caret-down"}/>
-                                } else {
-                                    caret = <FontAwesomeIcon icon={"caret-up"}/>
-                                }
-                            }
+                        {trs_side.map((tr, i) => {
                             return <tr key={i}>
-                                <th onClick={this.toggleChilds.bind(this, sides_measure, cell.code)}>
-                                    {cell.name}
-                                    <span style={{marginLeft: "7px"}}>{caret}</span>
-                                </th>
+                                {tr.tds.map((td,j) => {
+                                    return <th rowSpan={td.rowspan} key={j}>
+                                        {td.text}
+                                    </th>
+                                })}
+                                {/*<th onClick={this.toggleChilds.bind(this, sides_measure, side.code)}>*/}
+                                    {/*{side.name}*/}
+                                    {/*<span style={{marginLeft: "7px"}}>*/}
+                                        {/*{side.has_childs ? (!side.hidden_childs ?*/}
+                                            {/*<FontAwesomeIcon icon={"caret-down"}/> :*/}
+                                            {/*<FontAwesomeIcon icon={"caret-up"}/>) : false}*/}
+                                        {/*</span>*/}
+                                {/*</th>*/}
                             </tr>;
                         })}
                         <tr>
@@ -232,7 +339,7 @@ class PivotTable extends Component {
                 <div className="pivot-table-body">
                     <table cellSpacing={0}>
                         <tbody>
-                        {sides.map((side, i) => {
+                        {trs_side.map((side, i) => {
                             return <tr key={i}>
                                 {heads.map((head, j) => {
                                     return <td key={j}>
@@ -289,6 +396,19 @@ class PivotTable extends Component {
         this.setState({trees: new_trees})
 
         console.info('click - toggleChilds - result ', new_trees)
+    }
+
+    tree_iterator_with_childs(tree, callback) {
+        tree = callback(tree);
+        tree.childs = tree.childs.map(child => this.tree_iterator_with_childs(child, callback));
+        return tree;
+    }
+    tree_get_length(tree) {
+        let length = 0;
+        this.tree_iterator_with_childs(tree, (child) => {
+            length++;
+        });
+        return length;
     }
 }
 
