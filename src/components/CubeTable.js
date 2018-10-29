@@ -307,8 +307,8 @@ class CubeTable extends Component {
             <div>
                 <div className="cube-table" id="cubeTable">
                     <header className="cube-table-header" style={{
-                        marginLeft: (110 * sidebar_cols_count + 2) + "px",
-                        height: (30 * headers_rows_count + 2) + "px",
+                        marginLeft: (110 * sidebar_cols_count + 1) + "px",
+                        height: (30 * headers_rows_count + 1) + "px",
                     }}>
                         <table cellSpacing={0}>
                             <thead>
@@ -372,6 +372,7 @@ class CubeTable extends Component {
                             </tbody>
                         </table>
                     </div>
+                    <div style={{clear: 'both'}} />
                 </div>
                 <div className={"cube-old-settings"}>
                     <label>side

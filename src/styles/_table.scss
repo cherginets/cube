@@ -1,10 +1,14 @@
-$th-border-color: #cac6c6;
+$th-border-color: #e4e4e4;
 $th-border: 1px solid $th-border-color;
 
 //$sidebar-cols-count: 1;
 //$header-rows-count: 1;
 
 .cube-table {
+  background: white;
+  border: $th-border;
+  border-radius: 10px;
+
   table {
     background-color: white;
     width: auto;
@@ -29,7 +33,7 @@ $th-border: 1px solid $th-border-color;
     //margin-left: 110px * $sidebar-cols-count + 2;
     overflow: hidden;
     tr:first-child th {
-      border-top: $th-border;
+      border-top: none;
     }
     tr:last-child th {
       border-bottom: none;
@@ -47,11 +51,11 @@ $th-border: 1px solid $th-border-color;
     height: 310px;
     float: left;
     overflow: hidden;
-    border-left: 1px solid #cac6c6;
-    border-right: 1px solid #cac6c6;
-    border-bottom: 1px solid #cac6c6;
+
+    border-top: $th-border;
+    border-right: 1px solid $th-border-color;
     tr:first-child th {
-      border-top: $th-border;
+      border-top: none;
     }
     tr th:first-child {
       //border-left: $th-border;
@@ -62,12 +66,13 @@ $th-border: 1px solid $th-border-color;
     }
   }
   &-body {
-    overflow: scroll;
+    overflow: auto;
     width: 510px;
     height: 310px;
     float: left;
+    border-top: $th-border;
     tr:first-child td {
-      border-top: $th-border;
+      border-top: none;
     }
     tr td:first-child {
       //border-left: $th-border;
