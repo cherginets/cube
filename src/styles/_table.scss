@@ -47,6 +47,9 @@ $th-border: 1px solid $th-border-color;
     height: 310px;
     float: left;
     overflow: hidden;
+    border-left: 1px solid #cac6c6;
+    border-right: 1px solid #cac6c6;
+    border-bottom: 1px solid #cac6c6;
     tr:first-child th {
       border-top: $th-border;
     }
@@ -59,7 +62,7 @@ $th-border: 1px solid $th-border-color;
     }
   }
   &-body {
-    overflow: auto;
+    overflow: scroll;
     width: 510px;
     height: 310px;
     float: left;

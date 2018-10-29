@@ -8,6 +8,9 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace; }
 
+.cube-no-border {
+  border: none !important; }
+
 .cube-table table {
   background-color: white;
   width: auto; }
@@ -36,14 +39,17 @@ code {
 .cube-table-sidebar {
   height: 310px;
   float: left;
-  overflow: hidden; }
+  overflow: hidden;
+  border-left: 1px solid #cac6c6;
+  border-right: 1px solid #cac6c6;
+  border-bottom: 1px solid #cac6c6; }
   .cube-table-sidebar tr:first-child th {
     border-top: 1px solid #cac6c6; }
   .cube-table-sidebar th {
     border-right: 1px solid #cac6c6;
     border-bottom: 1px solid #cac6c6; }
 .cube-table-body {
-  overflow: auto;
+  overflow: scroll;
   width: 510px;
   height: 310px;
   float: left; }
@@ -53,14 +59,20 @@ code {
     border-bottom: 1px solid #cac6c6;
     border-right: 1px solid #cac6c6; }
 
+.cube-settings {
+  display: flex;
+  margin-bottom: 5px; }
+  .cube-settings-cog {
+    font-size: 20px;
+    margin-left: auto; }
+
 .cube-old-settings {
   display: flex;
   width: 100%;
   align-items: flex-end;
   justify-content: center;
   margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #cacaca; }
+  padding-top: 20px; }
   .cube-old-settings label {
     display: flex;
     flex-direction: column;

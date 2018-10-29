@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 
 class CubeSettingsPanel extends Component {
     constructor(props) {
@@ -6,7 +7,7 @@ class CubeSettingsPanel extends Component {
     }
     render() {
         return <div className="cube-settings">
-            settings
+            <FontAwesomeIcon className="cube-settings-cog" icon={'cog'}/>
         </div>
     }
 }

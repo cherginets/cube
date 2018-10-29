@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import CubeTable from "./CubeTable";
 import CubeSettingsPanel from "./CubeSettingsPanel";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faCaretUp, faCaretDown, faCaretLeft, faCaretRight, faCog } from '@fortawesome/free-solid-svg-icons'
+
+library.add(faCaretUp, faCaretDown, faCaretLeft, faCaretRight, faCog);
 
 class Cube extends Component {
     constructor(props) {

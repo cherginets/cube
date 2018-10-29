@@ -331,7 +331,7 @@ class CubeTable extends Component {
                             </thead>
                         </table>
                     </header>
-                    <aside className="cube-table-sidebar" style={{width: (110 * sidebar_cols_count + 3) + 'px'}}>
+                    <aside className="cube-table-sidebar" style={{width: (110 * sidebar_cols_count + 1) + 'px'}}>
                         <table cellSpacing={0}>
                             <tbody>
                             {trs_side.map((tr, i) => {
@@ -350,11 +350,9 @@ class CubeTable extends Component {
                                     })}
                                 </tr>;
                             })}
-                            <tr>
-                                <td></td>
+                            <tr><td className="cube-no-border"></td>
                             </tr>
-                            <tr>
-                                <td></td>
+                            <tr><td className="cube-no-border"></td>
                             </tr>
                             </tbody>
                         </table>
