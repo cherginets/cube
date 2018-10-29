@@ -211,16 +211,51 @@ class PivotTable extends Component {
 
         return get_trs(this.state.measures_side_tree)
     };
+    getTrsHead = () => {
+        let get_trs = (tree, param_length = 1) => {
+            let trs = [];
+            if(tree.hidden) {
+                return trs;
+            }
+            if(tree._subtree) {
+                trs = get_trs(tree._subtree, param_length);
+                trs = copy(trs);
+
+                let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
+                length = length * param_length;
+                trs[0].tds.unshift({...tree, rowSpan: length});
+                tree.childs
+                    .filter((child) => !child.hidden)
+                    .forEach(child => {
+                        trs = trs.concat(get_trs(child));
+                    });
+            } else {
+                trs.push({tds: [tree]});
+                tree.childs.forEach(child => {
+                    this.getTreeIterator(child, (child) => {
+                        if(!child.hidden) {
+                            trs.push({tds: [child]});
+                        }
+                    })
+                })
+            }
+            return trs;
+        };
+
+        return get_trs(this.state.measures_head_tree)
+    };
 
     render() {
-        let heads_measure = 'regions',
-            heads = this.getTreeIterator(this.state.trees[this.state.trees_map[heads_measure]]).filter(measure => !measure.hidden),
-            headers_rows_count = this.state.list_measures_head.length,
+        let headers_rows_count = this.state.list_measures_head.length,
             sidebar_cols_count = this.state.list_measures_side.length;
 
-        let trs_side = this.getTrsSide();
+        let trs_head = this.getTrsHead(),
+            trs_side = this.getTrsSide();
 
+        console.log('trs_head', trs_head);
         console.log('trs_side', trs_side);
+
+        console.log('measures_head_tree', this.state.measures_head_tree);
         console.log('measures_side_tree', this.state.measures_side_tree);
 
         return (
@@ -231,27 +266,22 @@ class PivotTable extends Component {
                 }}>
                     <table cellSpacing={0}>
                         <thead>
-                        <tr>
-                            {heads.map((cell, j) => {
-                                let caret = false;
-
-                                if (cell.has_childs) {
-                                    if (!cell.hidden_childs) {
-                                        caret = <FontAwesomeIcon icon={"caret-right"}/>
-                                    } else {
-                                        caret = <FontAwesomeIcon icon={"caret-left"}/>
-                                    }
-                                }
-
-                                return <th
-                                    key={j}
-                                    onClick={this.handleClickToggleChilds.bind(this, cell)}
-                                >
-                                    {cell.name}
-                                    <span style={{marginLeft: "7px"}}>{caret}</span>
-                                </th>
-                            })}
-                        </tr>
+                        {trs_head.map((tr, i) => {
+                            return <tr key={i}>
+                                {tr.tds.map((td, j) => {
+                                    return <th colSpan={td.colSpan} key={j}
+                                               onClick={this.handleClickToggleHeadChilds.bind(this, td)}>
+                                        {td.name}
+                                        <span style={{marginLeft: "7px"}}>
+                                        {td.has_childs ? (!td.hidden_childs ?
+                                            <FontAwesomeIcon icon={"caret-right"}/> :
+                                            <FontAwesomeIcon icon={"caret-left"}/>) :
+                                            false}
+                                        </span>
+                                    </th>
+                                })}
+                            </tr>;
+                        })}
                         </thead>
                     </table>
                 </header>
@@ -261,7 +291,7 @@ class PivotTable extends Component {
                         {trs_side.map((tr, i) => {
                             return <tr key={i}>
                                 {tr.tds.map((td,j) => {
-                                    return <th rowSpan={td.rowSpan} key={j} onClick={this.handleClickToggleChilds.bind(this, td)}>
+                                    return <th rowSpan={td.rowSpan} key={j} onClick={this.handleClickToggleSideChilds.bind(this, td)}>
                                         {td.name}
                                         <span style={{marginLeft: "7px"}}>
                                         {td.has_childs ? (!td.hidden_childs ?
@@ -287,7 +317,7 @@ class PivotTable extends Component {
                         <tbody>
                         {trs_side.map((side, i) => {
                             return <tr key={i}>
-                                {heads.map((head, j) => {
+                                {trs_head.map((head, j) => {
                                     return <td key={j}>
                                         cell{i}-{j}
                                     </td>
@@ -301,7 +331,7 @@ class PivotTable extends Component {
         );
     }
 
-    handleClickToggleChilds = (tree) => {
+    handleClickToggleSideChilds = (tree) => {
         let new_hidden = !tree.hidden_childs,
             new_childs = tree.childs.map(child => ({...child, hidden: new_hidden}));
 
@@ -312,6 +342,19 @@ class PivotTable extends Component {
         });
         this.setState({
             measures_side_tree: full_tree,
+        })
+    };
+    handleClickToggleHeadChilds = (tree) => {
+        let new_hidden = !tree.hidden_childs,
+            new_childs = tree.childs.map(child => ({...child, hidden: new_hidden}));
+
+        let full_tree = this.tree_set_element(this.state.measures_head_tree, tree._path, {
+            ...tree,
+            childs: new_childs,
+            hidden_childs: new_hidden,
+        });
+        this.setState({
+            measures_head_tree: full_tree,
         })
     };
 
