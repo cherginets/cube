@@ -110,10 +110,14 @@ class PivotTable extends Component {
 
         let init_list_measures_head = ['regions'],
             init_list_measures_side = ['years', 'products', 'scenarios'],
+
+            measures_head = init_list_measures_head.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
+            measures_head_tree = this.fullTree_get(init_list_measures_head),
+
             measures_side = init_list_measures_side.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
-            measures_side_map = create_map(measures_side, 'code'),
             measures_side_tree = this.fullTree_get(init_list_measures_side);
 
+        measures_head_tree = this.fullTree_setpaths(measures_head_tree);
         measures_side_tree = this.fullTree_setpaths(measures_side_tree);
 
         this.state = {
@@ -125,8 +129,10 @@ class PivotTable extends Component {
             trs_side: [],
 
             measures_side: measures_side,
-            measures_side_map: measures_side_map,
             measures_side_tree: measures_side_tree,
+
+            measures_head: measures_head,
+            measures_head_tree: measures_head_tree,
         };
     }
 
@@ -205,6 +211,7 @@ class PivotTable extends Component {
 
         return get_trs(this.state.measures_side_tree)
     };
+
     render() {
         let heads_measure = 'regions',
             heads = this.getTreeIterator(this.state.trees[this.state.trees_map[heads_measure]]).filter(measure => !measure.hidden),
@@ -293,7 +300,6 @@ class PivotTable extends Component {
             </div>
         );
     }
-
 
     handleClickToggleChilds = (tree) => {
         let new_hidden = !tree.hidden_childs,

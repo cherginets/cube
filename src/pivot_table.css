@@ -1,16 +1,16 @@
 .pivot-table table {
   background-color: white;
   width: auto; }
-  .pivot-table table tr td, .pivot-table table tr th {
+  .pivot-table table tr th, .pivot-table table tr td {
     min-width: 100px;
     width: 100px;
     min-height: 20px;
     height: 20px;
-    padding: 5px; }
+    padding: 5px;
+    font-size: 12px; }
   .pivot-table table th {
     background: #f3f3f3;
-    color: black;
-    font-size: 12px; }
+    color: black; }
 .pivot-table-header {
   width: 510px;
   overflow: hidden; }
