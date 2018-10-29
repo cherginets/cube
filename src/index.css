@@ -53,29 +53,30 @@ code {
     border-bottom: 1px solid #cac6c6;
     border-right: 1px solid #cac6c6; }
 
-.cube-settings {
+.cube-old-settings {
   display: flex;
+  width: 100%;
   align-items: flex-end;
   justify-content: center;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #cacaca; }
-  .cube-settings label {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #cacaca; }
+  .cube-old-settings label {
     display: flex;
     flex-direction: column;
     margin: 0 10px; }
-    .cube-settings label select {
+    .cube-old-settings label select {
       margin-top: 10px; }
-      .cube-settings label select option {
+      .cube-old-settings label select option {
         padding: 2px 10px; }
-  .cube-settings-button {
+  .cube-old-settings-button {
     padding: 1px 4px;
     border: 1px solid black;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center; }
-    .cube-settings-button:hover {
+    .cube-old-settings-button:hover {
       background: #ececec; }
 
 /*# sourceMappingURL=index.css.map */

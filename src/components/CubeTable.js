@@ -180,9 +180,8 @@ class CubeTable extends Component {
                 return $($header).css('margin-left', -$($body).scrollLeft());
             });
         };
-        new fixedTable($('#demo'));
+        new fixedTable($('#cubeTable'));
         //endregion
-
     }
 
     getTrs = (tree, param_length = 1) => {
@@ -305,29 +304,8 @@ class CubeTable extends Component {
         console.groupEnd();
 
         return (
-            <div className={"cube"}>
-                <div className={"cube-settings"}>
-                    <label>side
-                        <select id={"settings_side_measures"} multiple={true}>
-                            {this.state.list_measures_side.map((name, key) => {
-                                return <option value={name} key={key}>{name}</option>
-                            })}
-                        </select>
-                    </label>
-                    <label>
-                        <div className="cube-settings-button" onClick={this.settings_up} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-up"}/></div>
-                        <div className="cube-settings-button" onClick={this.settings_left} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-left"}/></div>
-                        <div className="cube-settings-button" onClick={this.settings_right}>                              <FontAwesomeIcon icon={"caret-right"}/></div>
-                    </label>
-                    <label>head
-                        <select id={"settings_head_measures"} multiple={true}>
-                            {this.state.list_measures_head.map((name, key) => {
-                                return <option value={name} key={key}>{name}</option>
-                            })}
-                        </select>
-                    </label>
-                </div>
-                <div className="cube-table" id="demo">
+            <div>
+                <div className="cube-table" id="cubeTable">
                     <header className="cube-table-header" style={{
                         marginLeft: (110 * sidebar_cols_count + 2) + "px",
                         height: (30 * headers_rows_count + 2) + "px",
@@ -396,6 +374,27 @@ class CubeTable extends Component {
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <div className={"cube-old-settings"}>
+                    <label>side
+                        <select id={"settings_side_measures"} multiple={true}>
+                            {this.state.list_measures_side.map((name, key) => {
+                                return <option value={name} key={key}>{name}</option>
+                            })}
+                        </select>
+                    </label>
+                    <label>
+                        <div className="cube-old-settings-button" onClick={this.settings_up} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-up"}/></div>
+                        <div className="cube-old-settings-button" onClick={this.settings_left} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-left"}/></div>
+                        <div className="cube-old-settings-button" onClick={this.settings_right}>                              <FontAwesomeIcon icon={"caret-right"}/></div>
+                    </label>
+                    <label>head
+                        <select id={"settings_head_measures"} multiple={true}>
+                            {this.state.list_measures_head.map((name, key) => {
+                                return <option value={name} key={key}>{name}</option>
+                            })}
+                        </select>
+                    </label>
                 </div>
             </div>
         );
