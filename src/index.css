@@ -23,6 +23,35 @@ code {
 .cube-m_mla {
   margin-left: auto; }
 
+.cube-modal {
+  position: relative;
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 600px; }
+  .cube-modal-overlay {
+    position: fixed;
+    display: flex;
+    align-items: flex-start;
+    padding-top: 30px;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0; }
+  .cube-modal-close {
+    position: absolute;
+    color: #3a3a3a;
+    right: 5px;
+    top: 1px; }
+  .cube-modal-help {
+    position: absolute;
+    color: #3a3a3a;
+    right: 24px;
+    top: 4px;
+    font-size: 14px; }
+
 .cube-table {
   background: white;
   border: 1px solid #e4e4e4;
