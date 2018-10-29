@@ -192,13 +192,6 @@ class PivotTable extends Component {
                     });
             } else {
                 trs.push({tds: [tree]});
-                let get_childs_trs = (childs) => {
-                    let trs = [];
-
-
-                    return trs;
-
-                };
                 tree.childs.forEach(child => {
                     this.getTreeIterator(child, (child) => {
                         if(!child.hidden) {
@@ -211,35 +204,6 @@ class PivotTable extends Component {
         };
 
         return get_trs(this.state.measures_side_tree)
-
-        // let get_visible_trs = (tree) => {
-        //     let tmp_trs = [];
-        //     this.getTreeIterator(tree, (subtree) => {
-        //         if(!subtree.hidden) {
-        //             tmp_trs.push({tds: [subtree]});
-        //         }
-        //     });
-        //     return tmp_trs;
-        // };
-
-        // trs = [];
-        // for( let i = this.state.measures_side.length - 1; i >= 0; i--) {
-        //     // let cur_trs = get_visible_trs(this.state.measures_side_tree[i]);
-        //     let cur_trs = get_visible_trs(this.state.measures_side[i]);
-        //     if(trs.length === 0) {
-        //         trs = cur_trs;
-        //     } else {
-        //         let new_trs = [];
-        //         cur_trs.forEach(tr => {
-        //             let tmp_trs = copy(trs);
-        //             tmp_trs[0].tds.unshift({...tr.tds[0], rowSpan: tmp_trs.length});
-        //             new_trs = new_trs.concat(tmp_trs)
-        //         });
-        //         trs = new_trs;
-        //     }
-        // }
-        //
-        // return trs;
     };
     render() {
         let heads_measure = 'regions',
@@ -300,10 +264,6 @@ class PivotTable extends Component {
                                         </span>
                                     </th>
                                 })}
-                                {/*<th>*/}
-                                    {/*{side.name}*/}
-
-                                {/*</th>*/}
                             </tr>;
                         })}
                         <tr>
@@ -336,8 +296,6 @@ class PivotTable extends Component {
 
 
     handleClickToggleChilds = (tree) => {
-        console.log('handleClickToggleChilds', tree)
-
         let new_hidden = !tree.hidden_childs,
             new_childs = tree.childs.map(child => ({...child, hidden: new_hidden}));
 
@@ -349,65 +307,20 @@ class PivotTable extends Component {
         this.setState({
             measures_side_tree: full_tree,
         })
-        // console.log('toggleChilds', tree)
-        // console.info('click - toggleChilds', measure_code, element_code)
-        //
-        // let tree_index = this.state.trees_map[measure_code],
-        //     tree = this.state.trees[tree_index];
-        //
-        // this.getTreeIterator(tree, (item => {
-        //     if (item.code === element_code) {
-        //         let hidden = !item.hidden_childs;
-        //         item.hidden_childs = hidden;
-        //
-        //         // Прежде чем проставлять видимость прямым детям - уберём видимость на всех что есть
-        //         let rec_set_hidden_true = (childs) => {
-        //             childs.forEach(child => {
-        //                 this.tree_set_element(tree, child.path, {...child, hidden: true, hidden_childs: true});
-        //                 rec_set_hidden_true(child.childs)
-        //             });
-        //         };
-        //
-        //         rec_set_hidden_true(item.childs);
-        //         item.childs.forEach(child => {
-        //             tree = this.tree_set_element(tree, child.path, {...child, hidden: hidden});
-        //         });
-        //     }
-        // }));
-        //
-        //
-        // let new_trees = this.state.trees;
-        // new_trees.splice(tree_index, 1, tree);
-        //
-        // this.setState({trees: new_trees})
-        //
-        // console.info('click - toggleChilds - result ', new_trees)
-    }
+    };
 
-    tree_iterator_with_childs(tree, callback, path = []) {
-        tree = callback(tree, path);
-        tree.childs = tree.childs.map((child, i) => this.tree_iterator_with_childs(child, callback, path.concat(['childs', i])));
+    tree_iterator_with_childs(tree, callback) {
+        tree = callback(tree);
+        tree.childs = tree.childs.map((child, i) => this.tree_iterator_with_childs(child, callback));
         return tree;
     }
-    tree_get_length(tree, filter = () => true) {
-        let length = 0;
-        this.tree_iterator_with_childs(tree, (child) => {
-            if(filter(child)) {
-                length++;
-            }
-            return child;
-        });
-        return length;
-    }
-    // for only not hidden
     tree_get_deep_length(tree, filter = () => true) {
         let length = 0;
 
         this.tree_iterator_with_childs(tree, (child) => {
             if(filter(child)) {
                 if(child._subtree) {
-                    let subtree_length = this.tree_get_deep_length(child._subtree, filter);
-                    length += subtree_length;
+                    length += this.tree_get_deep_length(child._subtree, filter);
                 } else {
                     length++;
                 }
@@ -419,8 +332,8 @@ class PivotTable extends Component {
     }
     tree_set_element = (tree, path, element) => {
         let eval_str = `tree${path.map(key => `['${key}']`).join('')} = element`;
-        // console.log('tree_set_element', tree, path, element);
-        // console.log('eval_str', eval_str);
+        console.info('tree_set_element', tree, path, element);
+        console.info('eval_str', eval_str);
 
         eval(eval_str);
         return tree;
@@ -451,6 +364,18 @@ class PivotTable extends Component {
             ...tree,
             _path: path,
         };
+    }
+
+    // Не используется но может пригодится
+    tree_get_length(tree, filter = () => true) {
+        let length = 0;
+        this.tree_iterator_with_childs(tree, (child) => {
+            if(filter(child)) {
+                length++;
+            }
+            return child;
+        });
+        return length;
     }
 }
 
