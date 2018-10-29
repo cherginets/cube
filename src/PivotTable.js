@@ -108,8 +108,8 @@ class PivotTable extends Component {
         this.init_trees = measures.map(measure => this.prepareTree(measure.tree));
         this.init_trees_map = create_map(this.init_trees, 'code');
 
-        let init_list_measures_head = ['regions'],
-            init_list_measures_side = ['years', 'products', 'scenarios'],
+        let init_list_measures_head = ['regions', 'products', 'scenarios'],
+            init_list_measures_side = ['years'],
 
             measures_head = init_list_measures_head.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
             measures_head_tree = this.fullTree_get(init_list_measures_head),
@@ -214,18 +214,19 @@ class PivotTable extends Component {
     getTrsHead = () => {
         let get_trs = (tree, param_length = 1) => {
             let trs = [];
-            if(tree.hidden) {
-                return trs;
-            }
+            // if(tree.hidden) {
+            //     return trs;
+            // }
             if(tree._subtree) {
                 trs = get_trs(tree._subtree, param_length);
                 trs = copy(trs);
 
-                let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
+                // let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
+                let length = this.tree_get_deep_length(tree._subtree);
                 length = length * param_length;
                 trs[0].tds.unshift({...tree, rowSpan: length});
                 tree.childs
-                    .filter((child) => !child.hidden)
+                    // .filter((child) => !child.hidden)
                     .forEach(child => {
                         trs = trs.concat(get_trs(child));
                     });
@@ -233,16 +234,123 @@ class PivotTable extends Component {
                 trs.push({tds: [tree]});
                 tree.childs.forEach(child => {
                     this.getTreeIterator(child, (child) => {
-                        if(!child.hidden) {
+                        // if(!child.hidden) {
                             trs.push({tds: [child]});
-                        }
+                        // }
                     })
                 })
             }
             return trs;
         };
+        let convert_trs_for_head = (trs) => {
+            console.group('func - convert_trs_for_head');
+            console.log('trs', trs);
+            let result_trs = [], added_td;
+            // debugger;
+            for (let i = trs.length - 1; i >= 0; i--) {
+                // Костылииии. Максимум в шапке может быть 4 уровня (строк заголовков)
+                if (trs[i].tds.length === 1) {
+                    if (!result_trs[result_trs.length - 1]) {
+                        result_trs[0] = {tds: []};
+                    }
+                    result_trs[result_trs.length - 1].tds.unshift(trs[i].tds[0]);
+                }
+                else if (trs[i].tds.length === 2) {
+                    if (!result_trs[result_trs.length - 2]) {
+                        result_trs.unshift({tds: []});
+                    }
+                    added_td = trs[i].tds[trs[i].tds.length - 1];
+                    result_trs[result_trs.length - 1].tds.unshift(added_td);
 
-        return get_trs(this.state.measures_head_tree)
+                    added_td = trs[i].tds[trs[i].tds.length - 2];
+                    result_trs[result_trs.length - 2].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+                }
+                else if (trs[i].tds.length === 3) {
+                    if (!result_trs[result_trs.length - 3]) {
+                        result_trs.unshift({tds: []});
+                    }
+                    added_td = trs[i].tds[trs[i].tds.length - 1];
+                    result_trs[result_trs.length - 1].tds.unshift(added_td);
+
+                    added_td = trs[i].tds[trs[i].tds.length - 2];
+                    result_trs[result_trs.length - 2].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+
+                    added_td = trs[i].tds[trs[i].tds.length - 3];
+                    result_trs[result_trs.length - 3].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+                }
+                else if (trs[i].tds.length === 4) {
+                    if (!result_trs[result_trs.length - 4]) {
+                        result_trs.unshift({tds: []});
+                    }
+                    added_td = trs[i].tds[trs[i].tds.length - 1];
+                    result_trs[result_trs.length - 1].tds.unshift(added_td);
+
+                    added_td = trs[i].tds[trs[i].tds.length - 2];
+                    result_trs[result_trs.length - 2].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+
+                    added_td = trs[i].tds[trs[i].tds.length - 3];
+                    result_trs[result_trs.length - 3].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+
+                    added_td = trs[i].tds[trs[i].tds.length - 4];
+                    result_trs[result_trs.length - 4].tds.unshift({
+                        ...added_td, colSpan: added_td.rowSpan
+                    });
+                }
+
+                console.log('trs[' + i + '];', trs[i])
+            }
+            console.log('result_trs', result_trs);
+            console.groupEnd();
+            // return trs;
+            return result_trs;
+
+            //
+            // let rowspan = false, rowspan_j = 0;
+            // trs.forEach((tr,i) => {
+            //     console.log('trs', i, tr.tds)
+            //     tr.tds.forEach((td, j) => {
+            //         if(td.rowSpan > 1) {
+            //             rowspan = td.rowSpan;
+            //             rowspan_j = j+1;
+            //         }
+            //         if(rowspan === td.rowSpan || rowspan === false) {
+            //             result_trs[j] = {
+            //                 ...result_trs[j],
+            //                 tds: (result_trs[j] && result_trs[j].tds ? result_trs[j].tds : []).concat([{
+            //                     ...td,
+            //                     colSpan: td.rowSpan,
+            //                     rowSpan: 1,
+            //                 }])
+            //             };
+            //             if(rowspan !== false) {
+            //                 rowspan--
+            //             }
+            //         } else if(rowspan !== false) {
+            //             rowspan--;
+            //             result_trs[rowspan_j] = {
+            //                 ...result_trs[rowspan_j],
+            //                 tds: (result_trs[rowspan_j] && result_trs[rowspan_j].tds ? result_trs[rowspan_j].tds : []).concat([{
+            //                     ...td,
+            //                     rowSpan: 1,
+            //                 }])
+            //             }
+            //         }
+            //     })
+            // });
+            // result_trs.push({tds: tds});
+        };
+        let trs = get_trs(this.state.measures_head_tree);
+        return convert_trs_for_head(trs);
     };
 
     render() {
@@ -252,11 +360,12 @@ class PivotTable extends Component {
         let trs_head = this.getTrsHead(),
             trs_side = this.getTrsSide();
 
-        console.log('trs_head', trs_head);
-        console.log('trs_side', trs_side);
-
-        console.log('measures_head_tree', this.state.measures_head_tree);
-        console.log('measures_side_tree', this.state.measures_side_tree);
+        console.groupCollapsed('render()');
+        console.info('trs_head', trs_head);
+        console.info('trs_side', trs_side);
+        console.info('measures_head_tree', this.state.measures_head_tree);
+        console.info('measures_side_tree', this.state.measures_side_tree);
+        console.groupEnd();
 
         return (
             <div className="pivot-table" id="demo">
@@ -269,6 +378,8 @@ class PivotTable extends Component {
                         {trs_head.map((tr, i) => {
                             return <tr key={i}>
                                 {tr.tds.map((td, j) => {
+                                    // console.log('td', td);
+                                    // console.log('td.colSpan', td.colSpan);
                                     return <th colSpan={td.colSpan} key={j}
                                                onClick={this.handleClickToggleHeadChilds.bind(this, td)}>
                                         {td.name}
@@ -317,7 +428,7 @@ class PivotTable extends Component {
                         <tbody>
                         {trs_side.map((side, i) => {
                             return <tr key={i}>
-                                {trs_head.map((head, j) => {
+                                {trs_head[trs_head.length - 1].tds.map((head, j) => {
                                     return <td key={j}>
                                         cell{i}-{j}
                                     </td>
