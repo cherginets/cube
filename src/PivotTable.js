@@ -188,15 +188,24 @@ class PivotTable extends Component {
                 tree.childs
                     .filter((child) => !child.hidden)
                     .forEach(child => {
-                        console.log('child', child.name);
                         trs = trs.concat(get_trs(child));
                     });
             } else {
-                trs.push({tds: [tree]})
-                trs = trs.concat(tree.childs
-                    .filter((child) => !child.hidden)
-                    .map(child => ({tds: [child]}))
-                );
+                trs.push({tds: [tree]});
+                let get_childs_trs = (childs) => {
+                    let trs = [];
+
+
+                    return trs;
+
+                };
+                tree.childs.forEach(child => {
+                    this.getTreeIterator(child, (child) => {
+                        if(!child.hidden) {
+                            trs.push({tds: [child]});
+                        }
+                    })
+                })
             }
             return trs;
         };
