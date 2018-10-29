@@ -2,4 +2,24 @@
   &-no-border {
     border: none !important;
   }
+  &-fa {
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.8;
+    &:hover {
+      opacity: 0.9;
+    }
+    &:active {
+      opacity: 1;
+    }
+  }
+  // Modificators
+  &-m {
+    &_ml10 {
+      margin-left: 10px;
+    }
+    &_mla {
+      margin-left: auto;
+    }
+  }
 }

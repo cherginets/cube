@@ -10,6 +10,18 @@ code {
 
 .cube-no-border {
   border: none !important; }
+.cube-fa {
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.8; }
+  .cube-fa:hover {
+    opacity: 0.9; }
+  .cube-fa:active {
+    opacity: 1; }
+.cube-m_ml10 {
+  margin-left: 10px; }
+.cube-m_mla {
+  margin-left: auto; }
 
 .cube-table table {
   background-color: white;
@@ -61,10 +73,7 @@ code {
 
 .cube-settings {
   display: flex;
-  margin-bottom: 5px; }
-  .cube-settings-cog {
-    font-size: 20px;
-    margin-left: auto; }
+  margin-bottom: 10px; }
 
 .cube-old-settings {
   display: flex;

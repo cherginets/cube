@@ -7,7 +7,8 @@ class CubeSettingsPanel extends Component {
     }
     render() {
         return <div className="cube-settings">
-            <FontAwesomeIcon className="cube-settings-cog" icon={'cog'}/>
+            <FontAwesomeIcon  className="cube-fa cube-m_mla" icon={'print'} title={"Print"}/>
+            <FontAwesomeIcon className="cube-fa cube-m_ml10" icon={'cog'} title={"Settings"}/>
         </div>
     }
 }
