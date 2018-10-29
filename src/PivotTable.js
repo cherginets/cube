@@ -214,19 +214,18 @@ class PivotTable extends Component {
     getTrsHead = () => {
         let get_trs = (tree, param_length = 1) => {
             let trs = [];
-            // if(tree.hidden) {
-            //     return trs;
-            // }
+            if(tree.hidden) {
+                return trs;
+            }
             if(tree._subtree) {
                 trs = get_trs(tree._subtree, param_length);
                 trs = copy(trs);
 
-                // let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
-                let length = this.tree_get_deep_length(tree._subtree);
+                let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
                 length = length * param_length;
                 trs[0].tds.unshift({...tree, rowSpan: length});
                 tree.childs
-                    // .filter((child) => !child.hidden)
+                    .filter((child) => !child.hidden)
                     .forEach(child => {
                         trs = trs.concat(get_trs(child));
                     });
@@ -234,9 +233,9 @@ class PivotTable extends Component {
                 trs.push({tds: [tree]});
                 tree.childs.forEach(child => {
                     this.getTreeIterator(child, (child) => {
-                        // if(!child.hidden) {
+                        if(!child.hidden) {
                             trs.push({tds: [child]});
-                        // }
+                        }
                     })
                 })
             }
@@ -246,19 +245,18 @@ class PivotTable extends Component {
             console.group('func - convert_trs_for_head');
             console.log('trs', trs);
             let result_trs = [], added_td;
-            // debugger;
+
             for (let i = trs.length - 1; i >= 0; i--) {
                 // Костылииии. Максимум в шапке может быть 4 уровня (строк заголовков)
                 if (trs[i].tds.length === 1) {
-                    if (!result_trs[result_trs.length - 1]) {
-                        result_trs[0] = {tds: []};
-                    }
+                    if (!result_trs[result_trs.length - 1]) result_trs.unshift({tds: []});
+
                     result_trs[result_trs.length - 1].tds.unshift(trs[i].tds[0]);
                 }
                 else if (trs[i].tds.length === 2) {
-                    if (!result_trs[result_trs.length - 2]) {
-                        result_trs.unshift({tds: []});
-                    }
+                    if (!result_trs[result_trs.length - 1]) result_trs.unshift({tds: []});
+                    if (!result_trs[result_trs.length - 2]) result_trs.unshift({tds: []});
+
                     added_td = trs[i].tds[trs[i].tds.length - 1];
                     result_trs[result_trs.length - 1].tds.unshift(added_td);
 
@@ -268,9 +266,10 @@ class PivotTable extends Component {
                     });
                 }
                 else if (trs[i].tds.length === 3) {
-                    if (!result_trs[result_trs.length - 3]) {
-                        result_trs.unshift({tds: []});
-                    }
+                    if (!result_trs[result_trs.length - 1]) result_trs.unshift({tds: []});
+                    if (!result_trs[result_trs.length - 2]) result_trs.unshift({tds: []});
+                    if (!result_trs[result_trs.length - 3]) result_trs.unshift({tds: []});
+
                     added_td = trs[i].tds[trs[i].tds.length - 1];
                     result_trs[result_trs.length - 1].tds.unshift(added_td);
 
