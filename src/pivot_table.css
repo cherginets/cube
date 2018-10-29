@@ -29,8 +29,6 @@
   overflow: hidden; }
   .pivot-table-sidebar tr:first-child th {
     border-top: 1px solid #cac6c6; }
-  .pivot-table-sidebar tr th:first-child {
-    border-left: 1px solid #cac6c6; }
   .pivot-table-sidebar th {
     border-right: 1px solid #cac6c6;
     border-bottom: 1px solid #cac6c6; }

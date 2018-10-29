@@ -2,8 +2,10 @@ import React, {Component} from 'react';
 import $ from 'jquery';
 import PropTypes from 'prop-types';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import './cube.css';
 import './pivot_table.css';
 
+window.$ = $;
 
 let get_range = (end, start = 1) => {
     let result = [];
@@ -109,30 +111,39 @@ class PivotTable extends Component {
         this.init_trees_map = create_map(this.init_trees, 'code');
 
         let init_list_measures_head = ['regions', 'products'],
-            init_list_measures_side = ['years', 'scenarios'],
-
-            measures_head = init_list_measures_head.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
-            measures_head_tree = this.fullTree_get(init_list_measures_head),
-
-            measures_side = init_list_measures_side.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
-            measures_side_tree = this.fullTree_get(init_list_measures_side);
-
-        measures_head_tree = this.fullTree_setpaths(measures_head_tree);
-        measures_side_tree = this.fullTree_setpaths(measures_side_tree);
+            init_list_measures_side = ['years', 'scenarios'];
 
         this.state = {
             trees: this.init_trees,
             trees_map: this.init_trees_map,
             list_measures_head: init_list_measures_head,
             list_measures_side: init_list_measures_side,
+        };
 
+        this.state = {
+            ...this.state,
+            ...this.get_init_trees()
+        }
+    }
+
+    get_init_trees = () => {
+        let measures_head = this.state.list_measures_head.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
+            measures_head_tree = this.fullTree_get(this.state.list_measures_head),
+
+            measures_side = this.state.list_measures_side.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
+            measures_side_tree = this.fullTree_get(this.state.list_measures_side);
+
+        measures_head_tree = this.fullTree_setpaths(measures_head_tree);
+        measures_side_tree = this.fullTree_setpaths(measures_side_tree);
+
+        return {
             measures_side: measures_side,
             measures_side_tree: measures_side_tree,
 
             measures_head: measures_head,
             measures_head_tree: measures_head_tree,
-        };
-    }
+        }
+    };
 
     prepareTree = (tree, lvl = 0, path = []) => {
         tree._measure_path = path;
@@ -296,79 +307,204 @@ class PivotTable extends Component {
         console.groupEnd();
 
         return (
-            <div className="pivot-table" id="demo">
-                <header className="pivot-table-header" style={{
-                    marginLeft: (110 * sidebar_cols_count + 2) + "px",
-                    height: (30 * headers_rows_count + 2) + "px",
-                }}>
-                    <table cellSpacing={0}>
-                        <thead>
-                        {trs_head.map((tr, i) => {
-                            return <tr key={i}>
-                                {tr.tds.map((td, j) => {
-                                    // console.log('td', td);
-                                    // console.log('td.colSpan', td.colSpan);
-                                    return <th colSpan={td.colSpan} key={j}
-                                               onClick={this.handleClickToggleHeadChilds.bind(this, td)}>
-                                        {td.name}
-                                        <span style={{marginLeft: "7px"}}>
+            <div className={"cube"}>
+                <div className={"cube-settings"}>
+                    <label>side
+                        <select id={"settings_side_measures"} multiple={true}>
+                            {this.state.list_measures_side.map((name, key) => {
+                                return <option value={name} key={key}>{name}</option>
+                            })}
+                        </select>
+                    </label>
+                    <label>
+                        <div className="cube-settings-button" onClick={this.settings_up} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-up"}/></div>
+                        <div className="cube-settings-button" onClick={this.settings_left} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-left"}/></div>
+                        <div className="cube-settings-button" onClick={this.settings_right}>                              <FontAwesomeIcon icon={"caret-right"}/></div>
+                    </label>
+                    <label>head
+                        <select id={"settings_head_measures"} multiple={true}>
+                            {this.state.list_measures_head.map((name, key) => {
+                                return <option value={name} key={key}>{name}</option>
+                            })}
+                        </select>
+                    </label>
+                </div>
+                <div className="pivot-table" id="demo">
+                    <header className="pivot-table-header" style={{
+                        marginLeft: (110 * sidebar_cols_count + 2) + "px",
+                        height: (30 * headers_rows_count + 2) + "px",
+                    }}>
+                        <table cellSpacing={0}>
+                            <thead>
+                            {trs_head.map((tr, i) => {
+                                return <tr key={i}>
+                                    {tr.tds.map((td, j) => {
+                                        return <th colSpan={td.colSpan} key={j}
+                                                   onClick={this.handleClickToggleHeadChilds.bind(this, td)}>
+                                            {td.name}
+                                            <span style={{marginLeft: "7px"}}>
                                         {td.has_childs ? (!td.hidden_childs ?
                                             <FontAwesomeIcon icon={"caret-right"}/> :
                                             <FontAwesomeIcon icon={"caret-left"}/>) :
                                             false}
                                         </span>
-                                    </th>
-                                })}
-                            </tr>;
-                        })}
-                        </thead>
-                    </table>
-                </header>
-                <aside className="pivot-table-sidebar" style={{width: (110 * sidebar_cols_count + 3) + 'px'}}>
-                    <table cellSpacing={0}>
-                        <tbody>
-                        {trs_side.map((tr, i) => {
-                            return <tr key={i}>
-                                {tr.tds.map((td,j) => {
-                                    return <th rowSpan={td.rowSpan} key={j} onClick={this.handleClickToggleSideChilds.bind(this, td)}>
-                                        {td.name}
-                                        <span style={{marginLeft: "7px"}}>
+                                        </th>
+                                    })}
+                                </tr>;
+                            })}
+                            </thead>
+                        </table>
+                    </header>
+                    <aside className="pivot-table-sidebar" style={{width: (110 * sidebar_cols_count + 3) + 'px'}}>
+                        <table cellSpacing={0}>
+                            <tbody>
+                            {trs_side.map((tr, i) => {
+                                return <tr key={i}>
+                                    {tr.tds.map((td, j) => {
+                                        return <th rowSpan={td.rowSpan} key={j}
+                                                   onClick={this.handleClickToggleSideChilds.bind(this, td)}>
+                                            {td.name}
+                                            <span style={{marginLeft: "7px"}}>
                                         {td.has_childs ? (!td.hidden_childs ?
                                             <FontAwesomeIcon icon={"caret-down"}/> :
                                             <FontAwesomeIcon icon={"caret-up"}/>) :
                                             false}
                                         </span>
-                                    </th>
-                                })}
-                            </tr>;
-                        })}
-                        <tr>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </aside>
-                <div className="pivot-table-body">
-                    <table cellSpacing={0}>
-                        <tbody>
-                        {trs_side.map((side, i) => {
-                            return <tr key={i}>
-                                {trs_head[trs_head.length - 1].tds.map((head, j) => {
-                                    return <td key={j}>
-                                        cell{i}-{j}
-                                    </td>
-                                })}
+                                        </th>
+                                    })}
+                                </tr>;
+                            })}
+                            <tr>
+                                <td></td>
                             </tr>
-                        })}
-                        </tbody>
-                    </table>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </aside>
+                    <div className="pivot-table-body">
+                        <table cellSpacing={0}>
+                            <tbody>
+                            {trs_side.map((side, i) => {
+                                return <tr key={i}>
+                                    {trs_head[trs_head.length - 1].tds.map((head, j) => {
+                                        return <td key={j}>
+                                            cell{i}-{j}
+                                        </td>
+                                    })}
+                                </tr>
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         );
     }
+
+    // todo: Переписать блок настроек по нормальному
+    swapArray = (arr, oldPlace, newPlace) => {
+        // Проверим выход за пределы массива
+        if((Math.min(oldPlace, newPlace) < 0) || (Math.max(oldPlace, newPlace) >= arr.length)) {
+            console.error('Out of range')
+            return null;
+        }
+        const item = arr.splice(oldPlace, 1);
+        arr.splice((newPlace > 0)? newPlace-1: 0, 0, item[0])
+        return arr;
+    };
+    settings_get_values = () => {
+        let $settings_side_measures = $('#settings_side_measures');
+        let $settings_head_measures = $('#settings_head_measures');
+        return {
+            side: $settings_side_measures.val(),
+            head: $settings_head_measures.val(),
+            side_options_count: $settings_side_measures[0].options.length,
+            head_options_count: $settings_head_measures[0].options.length,
+        }
+    };
+    settings_check = () => {
+        console.log('this.state', this.state);
+        let values = this.settings_get_values();
+        if(values.side.length > 0 && values.head.length > 0) {
+            alert('Для перемещения надо выбрать только ОДНО значение! (убрать значение можно с нажатым CTRL)');
+            return false;
+        }
+        return true;
+    };
+    settings_up = () => {
+        if(!this.settings_check()) return false;
+
+        let values = this.settings_get_values();
+        if(values.side[0]) {
+            let list_measures_side = this.state.list_measures_side,
+                index = list_measures_side.indexOf(values.side[0]);
+
+            if(index === 0) {
+                return false;
+            }
+            list_measures_side = this.swapArray(list_measures_side, index, index - 1);
+            this.setState({
+                list_measures_side: list_measures_side,
+            }, () => this.setState({...this.get_init_trees()}));
+        } else if(values.head[0]) {
+            let list_measures_head = this.state.list_measures_head,
+                index = list_measures_head.indexOf(values.head[0]);
+
+            if(index === 0) {
+                return false;
+            }
+            list_measures_head = this.swapArray(list_measures_head, index, index - 1);
+            this.setState({
+                list_measures_head: list_measures_head,
+            }, () => this.setState({...this.get_init_trees()}));
+        }
+    };
+    settings_left = () => {
+        if(!this.settings_check()) return false;
+        let values = this.settings_get_values();
+
+
+        if(values.head[0]) {
+            if(values.head_options_count === 1) {
+                alert('В верхней части должна остаться хотя бы одна строка!');
+                return false;
+            }
+            let list_measures_side = this.state.list_measures_side,
+                list_measures_head = this.state.list_measures_head;
+
+            list_measures_head.splice(list_measures_head.indexOf(values.head[0]), 1);
+            list_measures_side.push(values.head[0]);
+
+            this.setState({
+                list_measures_side: list_measures_side,
+                list_measures_head: list_measures_head,
+            }, () => this.setState({...this.get_init_trees()}))
+        }
+        console.info('settings_left', values)
+    };
+    settings_right = () => {
+        if(!this.settings_check()) return false;
+
+        let values = this.settings_get_values();
+        if(values.side[0]) {
+            if (values.side_options_count === 1) {
+                alert('В левой части должна остаться хотя бы одна колонка!');
+                return false;
+            }
+            let list_measures_side = this.state.list_measures_side,
+                list_measures_head = this.state.list_measures_head;
+
+            list_measures_side.splice(list_measures_side.indexOf(values.side[0]), 1);
+            list_measures_head.push(values.side[0]);
+
+            this.setState({
+                list_measures_side: list_measures_side,
+                list_measures_head: list_measures_head,
+            }, () => this.setState({...this.get_init_trees()}))
+        }
+    };
 
     handleClickToggleSideChilds = (tree) => {
         let new_hidden = !tree.hidden_childs,
@@ -420,8 +556,7 @@ class PivotTable extends Component {
     }
     tree_set_element = (tree, path, element) => {
         let eval_str = `tree${path.map(key => `['${key}']`).join('')} = element`;
-        console.info('tree_set_element', tree, path, element);
-        console.info('eval_str', eval_str);
+        element = copy(element);// Что бы не было варнинга
 
         eval(eval_str);
         return tree;
