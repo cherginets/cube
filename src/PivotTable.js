@@ -72,7 +72,6 @@ class PivotTable extends Component {
                 tree: {
                     name: "All products",
                     code: "products",
-                    hidden: false,
                     childs: [
                         {name: "Paper"},
                         {name: "Tables"},
@@ -85,12 +84,10 @@ class PivotTable extends Component {
                 tree: {
                     name: "All years",
                     code: "years",
-                    hidden: false,
-                    hidden_childs: false,
                     childs: [
-                        {name: "2018", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
-                        {name: "2017", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
-                        {name: "2016", hidden: false, childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2018", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2017", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
+                        {name: "2016", childs: [{name: "Q 1"}, {name: "Q 2"}, {name: "Q 3"}, {name: "Q 4"}]},
                     ]
                 }
             },
@@ -100,7 +97,6 @@ class PivotTable extends Component {
                 tree: {
                     name: "All scenarios",
                     code: "scenarios",
-                    hidden: false,
                     childs: [
                         {name: "Actual"},
                         {name: "Budget"},
@@ -115,7 +111,10 @@ class PivotTable extends Component {
         let init_list_measures_head = ['regions'],
             init_list_measures_side = ['years', 'products', 'scenarios'],
             measures_side = init_list_measures_side.map(measure_code => copy(this.init_trees[this.init_trees_map[measure_code]])),
-            measures_side_map = create_map(measures_side, 'code');
+            measures_side_map = create_map(measures_side, 'code'),
+            measures_side_tree = this.fullTree_get(init_list_measures_side);
+
+        measures_side_tree = this.fullTree_setpaths(measures_side_tree);
 
         this.state = {
             trees: this.init_trees,
@@ -127,47 +126,18 @@ class PivotTable extends Component {
 
             measures_side: measures_side,
             measures_side_map: measures_side_map,
-            measures_side_tree: this.getFullTree(init_list_measures_side),
+            measures_side_tree: measures_side_tree,
         };
     }
-    buildMeasureTree = (measures) => {
-        console.log('buildMeasureTree', measures)
-        let result = {}, ref_trees = {};
-        //building ref trees
-        measures.forEach(measure => {
-            ref_trees[measure.code] = {};
-            this.getTreeIterator(measure, (tree) => {
-                ref_trees[measure.code][tree.code] = tree;
-            })
-        });
-        // debugger;
-        for(let i = measures.length - 2; i >= 0; i--) {
-            console.log('cycle', measures[i], ref_trees[measures[i+1].code]);
-        }
-        console.log('ref_trees', ref_trees)
-        return {
-            years: {
-                products:
-                    {
-                        paper: {},
-                        tables: {},
-                        pencils: {},
-                    }
-            },
-            2018: {},
-            2017: {},
-            2016: {},
-        }
-    };
 
     prepareTree = (tree, lvl = 0, path = []) => {
-        tree.path = path;
+        tree._measure_path = path;
         if (tree.childs && tree.childs.length > 0) {
             tree.childs = tree.childs.map((child, i) => this.prepareTree(child, lvl + 1, path.concat(['childs', i])))
         } else {
             tree.childs = [];
         }
-        tree.hidden = typeof tree.hidden !== 'undefined' ? tree.hidden : true;
+        tree.hidden = lvl !== 0;
         tree.hidden_childs = typeof tree.hidden_childs !== 'undefined' ? tree.hidden_childs : true;
 
         tree.lvl = lvl;
@@ -200,37 +170,30 @@ class PivotTable extends Component {
         new fixedTable($('#demo'));
         //endregion
 
-        this.setState({
-            trs_side: this.getTrsSide(),
-        })
     }
 
     getTrsSide = () => {
-        console.log('getTrsSide', this.state.measures_side_tree);
-        let get_visible_trs = (tree) => {
-            let tmp_trs = [];
-            this.getTreeIterator(tree, (subtree) => {
-                if(!subtree.hidden) {
-                    tmp_trs.push({tds: [subtree]});
-                }
-            });
-            return tmp_trs;
-        };
         let get_trs = (tree, param_length = 1) => {
             let trs = [];
             if(tree.hidden) {
                 return trs;
             }
             if(tree._subtree) {
-                trs = get_trs(tree._subtree, length);
+                trs = get_trs(tree._subtree, param_length);
                 trs = copy(trs);
-                let length = this.tree_get_length(tree._subtree, (tree) => !tree.hidden);
+                if(this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden) === 6) {
+                    debugger;
+                }
+                let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
+                console.log(`${length * param_length} = ${length} * ${param_length}`)
                 length = length * param_length;
                 trs[0].tds.unshift({...tree, rowSpan: length});
                 tree.childs
                     .filter((child) => !child.hidden)
-                    .forEach(child => (trs = trs.concat(get_trs(child)))
-                )
+                    .forEach(child => {
+                        console.log('child', child.name);
+                        trs = trs.concat(get_trs(child));
+                    });
             } else {
                 trs.push({tds: [tree]})
                 trs = trs.concat(tree.childs
@@ -239,30 +202,38 @@ class PivotTable extends Component {
                 );
             }
             return trs;
-        }
-        let trs = [];
-        trs = get_trs(this.state.measures_side_tree);
-        console.log('new_trs', trs);
-        return trs;
+        };
 
-        trs = [];
-        for( let i = this.state.measures_side.length - 1; i >= 0; i--) {
-            // let cur_trs = get_visible_trs(this.state.measures_side_tree[i]);
-            let cur_trs = get_visible_trs(this.state.measures_side[i]);
-            if(trs.length === 0) {
-                trs = cur_trs;
-            } else {
-                let new_trs = [];
-                cur_trs.forEach(tr => {
-                    let tmp_trs = copy(trs);
-                    tmp_trs[0].tds.unshift({...tr.tds[0], rowSpan: tmp_trs.length});
-                    new_trs = new_trs.concat(tmp_trs)
-                });
-                trs = new_trs;
-            }
-        }
+        return get_trs(this.state.measures_side_tree)
 
-        return trs;
+        // let get_visible_trs = (tree) => {
+        //     let tmp_trs = [];
+        //     this.getTreeIterator(tree, (subtree) => {
+        //         if(!subtree.hidden) {
+        //             tmp_trs.push({tds: [subtree]});
+        //         }
+        //     });
+        //     return tmp_trs;
+        // };
+
+        // trs = [];
+        // for( let i = this.state.measures_side.length - 1; i >= 0; i--) {
+        //     // let cur_trs = get_visible_trs(this.state.measures_side_tree[i]);
+        //     let cur_trs = get_visible_trs(this.state.measures_side[i]);
+        //     if(trs.length === 0) {
+        //         trs = cur_trs;
+        //     } else {
+        //         let new_trs = [];
+        //         cur_trs.forEach(tr => {
+        //             let tmp_trs = copy(trs);
+        //             tmp_trs[0].tds.unshift({...tr.tds[0], rowSpan: tmp_trs.length});
+        //             new_trs = new_trs.concat(tmp_trs)
+        //         });
+        //         trs = new_trs;
+        //     }
+        // }
+        //
+        // return trs;
     };
     render() {
         let heads_measure = 'regions',
@@ -270,9 +241,10 @@ class PivotTable extends Component {
             headers_rows_count = this.state.list_measures_head.length,
             sidebar_cols_count = this.state.list_measures_side.length;
 
-        let trs_side = this.state.trs_side;
+        let trs_side = this.getTrsSide();
 
         console.log('trs_side', trs_side);
+        console.log('measures_side_tree', this.state.measures_side_tree);
 
         return (
             <div className="pivot-table" id="demo">
@@ -296,7 +268,7 @@ class PivotTable extends Component {
 
                                 return <th
                                     key={j}
-                                    onClick={this.toggleChilds.bind(this, heads_measure, cell.code)}
+                                    onClick={this.handleClickToggleChilds.bind(this, cell)}
                                 >
                                     {cell.name}
                                     <span style={{marginLeft: "7px"}}>{caret}</span>
@@ -312,7 +284,7 @@ class PivotTable extends Component {
                         {trs_side.map((tr, i) => {
                             return <tr key={i}>
                                 {tr.tds.map((td,j) => {
-                                    return <th rowSpan={td.rowSpan} key={j}>
+                                    return <th rowSpan={td.rowSpan} key={j} onClick={this.handleClickToggleChilds.bind(this, td)}>
                                         {td.name}
                                         <span style={{marginLeft: "7px"}}>
                                         {td.has_childs ? (!td.hidden_childs ?
@@ -322,7 +294,7 @@ class PivotTable extends Component {
                                         </span>
                                     </th>
                                 })}
-                                {/*<th onClick={this.toggleChilds.bind(this, sides_measure, side.code)}>*/}
+                                {/*<th>*/}
                                     {/*{side.name}*/}
 
                                 {/*</th>*/}
@@ -356,52 +328,59 @@ class PivotTable extends Component {
         );
     }
 
-    setTreeElement = (tree, path, element) => {
-        let eval_str = `tree${path.map(key => `['${key}']`).join('')} = element`;
-        console.log('setTreeElement', tree, path, element);
-        console.log('eval_str', eval_str);
 
-        eval(eval_str);
-        return tree;
-    };
-    toggleChilds = (measure_code, element_code) => {
-        console.info('click - toggleChilds', measure_code, element_code)
+    handleClickToggleChilds = (tree) => {
+        console.log('handleClickToggleChilds', tree)
 
-        let tree_index = this.state.trees_map[measure_code],
-            tree = this.state.trees[tree_index];
+        let new_hidden = !tree.hidden_childs,
+            new_childs = tree.childs.map(child => ({...child, hidden: new_hidden}));
 
-        this.getTreeIterator(tree, (item => {
-            if (item.code === element_code) {
-                let hidden = !item.hidden_childs;
-                item.hidden_childs = hidden;
-
-                // Прежде чем проставлять видимость прямым детям - уберём видимость на всех что есть
-                let rec_set_hidden_true = (childs) => {
-                    childs.forEach(child => {
-                        this.setTreeElement(tree, child.path, {...child, hidden: true, hidden_childs: true});
-                        rec_set_hidden_true(child.childs)
-                    });
-                };
-
-                rec_set_hidden_true(item.childs);
-                item.childs.forEach(child => {
-                    tree = this.setTreeElement(tree, child.path, {...child, hidden: hidden});
-                });
-            }
-        }));
-
-
-        let new_trees = this.state.trees;
-        new_trees.splice(tree_index, 1, tree);
-
-        this.setState({trees: new_trees})
-
-        console.info('click - toggleChilds - result ', new_trees)
+        let full_tree = this.tree_set_element(this.state.measures_side_tree, tree._path, {
+            ...tree,
+            childs: new_childs,
+            hidden_childs: new_hidden,
+        });
+        this.setState({
+            measures_side_tree: full_tree,
+        })
+        // console.log('toggleChilds', tree)
+        // console.info('click - toggleChilds', measure_code, element_code)
+        //
+        // let tree_index = this.state.trees_map[measure_code],
+        //     tree = this.state.trees[tree_index];
+        //
+        // this.getTreeIterator(tree, (item => {
+        //     if (item.code === element_code) {
+        //         let hidden = !item.hidden_childs;
+        //         item.hidden_childs = hidden;
+        //
+        //         // Прежде чем проставлять видимость прямым детям - уберём видимость на всех что есть
+        //         let rec_set_hidden_true = (childs) => {
+        //             childs.forEach(child => {
+        //                 this.tree_set_element(tree, child.path, {...child, hidden: true, hidden_childs: true});
+        //                 rec_set_hidden_true(child.childs)
+        //             });
+        //         };
+        //
+        //         rec_set_hidden_true(item.childs);
+        //         item.childs.forEach(child => {
+        //             tree = this.tree_set_element(tree, child.path, {...child, hidden: hidden});
+        //         });
+        //     }
+        // }));
+        //
+        //
+        // let new_trees = this.state.trees;
+        // new_trees.splice(tree_index, 1, tree);
+        //
+        // this.setState({trees: new_trees})
+        //
+        // console.info('click - toggleChilds - result ', new_trees)
     }
 
-    tree_iterator_with_childs(tree, callback) {
-        tree = callback(tree);
-        tree.childs = tree.childs.map(child => this.tree_iterator_with_childs(child, callback));
+    tree_iterator_with_childs(tree, callback, path = []) {
+        tree = callback(tree, path);
+        tree.childs = tree.childs.map((child, i) => this.tree_iterator_with_childs(child, callback, path.concat(['childs', i])));
         return tree;
     }
     tree_get_length(tree, filter = () => true) {
@@ -414,22 +393,60 @@ class PivotTable extends Component {
         });
         return length;
     }
+    // for only not hidden
+    tree_get_deep_length(tree, filter = () => true) {
+        let length = 0;
 
-    //неиспользуется
-    getFullTree = (measures) => {
-        let result_tree = this.init_trees[this.init_trees_map[measures[0]]];
+        this.tree_iterator_with_childs(tree, (child) => {
+            if(filter(child)) {
+                length++;
+                // length += this.tree_get_deep_length(tree._subtree, filter);
+            }
+            return child;
+        });
+        if(tree._subtree) {
+            let subtree_length = this.tree_get_deep_length(tree._subtree, filter);
+            if(subtree_length > 1) {
+                length = length - 1 + subtree_length;
+            }
+        }
+        return length;
+    }
+    tree_set_element = (tree, path, element) => {
+        let eval_str = `tree${path.map(key => `['${key}']`).join('')} = element`;
+        // console.log('tree_set_element', tree, path, element);
+        // console.log('eval_str', eval_str);
+
+        eval(eval_str);
+        return tree;
+    };
+
+    fullTree_get = (measures) => {
+        let result_tree = copy(this.init_trees[this.init_trees_map[measures[0]]]);
 
         if(measures[1]) {
             result_tree = this.tree_iterator_with_childs(result_tree, (tree) => {
                 return {
                     ...tree,
-                    _subtree: this.getFullTree(measures.slice(1,measures.length))
+                    _subtree: this.fullTree_get(measures.slice(1,measures.length)),
                 }
             });
         }
 
-        return result_tree;
+        return {
+            ...result_tree,
+        };
     };
+    fullTree_setpaths(tree, path = []) {
+        tree.childs = tree.childs.map((child, i) => this.fullTree_setpaths(child, path.concat(['childs', i])));
+        if(tree._subtree) {
+            tree._subtree = this.fullTree_setpaths(tree._subtree, path.concat(['_subtree']))
+        }
+        return {
+            ...tree,
+            _path: path,
+        };
+    }
 }
 
 PivotTable.defaultProps = {
