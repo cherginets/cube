@@ -181,11 +181,8 @@ class PivotTable extends Component {
             if(tree._subtree) {
                 trs = get_trs(tree._subtree, param_length);
                 trs = copy(trs);
-                if(this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden) === 6) {
-                    debugger;
-                }
+
                 let length = this.tree_get_deep_length(tree._subtree, (tree) => !tree.hidden);
-                console.log(`${length * param_length} = ${length} * ${param_length}`)
                 length = length * param_length;
                 trs[0].tds.unshift({...tree, rowSpan: length});
                 tree.childs
@@ -399,17 +396,16 @@ class PivotTable extends Component {
 
         this.tree_iterator_with_childs(tree, (child) => {
             if(filter(child)) {
-                length++;
-                // length += this.tree_get_deep_length(tree._subtree, filter);
+                if(child._subtree) {
+                    let subtree_length = this.tree_get_deep_length(child._subtree, filter);
+                    length += subtree_length;
+                } else {
+                    length++;
+                }
             }
             return child;
         });
-        if(tree._subtree) {
-            let subtree_length = this.tree_get_deep_length(tree._subtree, filter);
-            if(subtree_length > 1) {
-                length = length - 1 + subtree_length;
-            }
-        }
+
         return length;
     }
     tree_set_element = (tree, path, element) => {
