@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import CubeTable from "./CubeTable";
-import CubeSettings from "./CubeSettings";
+import CubeTopPanel from "./CubeTopPanel";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCaretUp, faCaretDown, faCaretLeft, faCaretRight, faCog, faPrint, faTimes, faQuestion } from '@fortawesome/free-solid-svg-icons'
@@ -12,7 +12,7 @@ class Cube extends Component {
     }
     render() {
         return <div className="cube">
-            <CubeSettings />
+            <CubeTopPanel />
             <CubeTable />
         </div>
     }

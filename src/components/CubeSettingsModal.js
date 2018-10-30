@@ -1,20 +1,36 @@
 import React, {Component} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {connect} from 'react-redux';
+import { bindActionCreators } from 'redux'
+import {settings_close_modal} from "../actions/SettingsActions";
 
-class CubeSettingsPanel extends Component {
+class CubeSettingsModal extends Component {
     constructor(props) {
         super(props);
     }
+
     render() {
+        if (!this.props.modal_show) return false;
+
         return <div className="cube-modal-overlay cube-settings-modal">
             <div className="cube-modal">
                 test
 
-                <FontAwesomeIcon  className="cube-fa cube-modal-close" icon={'times'} title={"Close"}/>
-                <FontAwesomeIcon  className="cube-fa cube-modal-help" icon={'question'} title={"Help"}/>
+                <FontAwesomeIcon className="cube-fa cube-modal-close" icon={'times'} title={"Close"}
+                    onClick={this.props.settings_close_modal}
+                />
+                <FontAwesomeIcon className="cube-fa cube-modal-help" icon={'question'} title={"Help"}/>
             </div>
         </div>
     }
 }
 
-export default CubeSettingsPanel;
+const mapStateToProps = (state, ownProps) => ({
+    modal_show: state.settings.modal_show,
+});
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    settings_close_modal: settings_close_modal,
+}, dispatch);
+
+export default connect(mapStateToProps, mapDispatchToProps)(CubeSettingsModal);
