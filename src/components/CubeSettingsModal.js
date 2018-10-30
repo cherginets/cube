@@ -12,8 +12,8 @@ class CubeSettingsModal extends Component {
     render() {
         if (!this.props.modal_show) return false;
 
-        return <div className="cube-modal-overlay cube-settings-modal">
-            <div className="cube-modal">
+        return <div className="cube-modal-overlay cube-settings-modal" onClick={this.props.settings_close_modal}>
+            <div className="cube-modal" onClick={e => e.stopPropagation()}>
                 test
 
                 <FontAwesomeIcon className="cube-fa cube-modal-close" icon={'times'} title={"Close"}

@@ -374,27 +374,6 @@ class CubeTable extends Component {
                     </div>
                     <div style={{clear: 'both'}} />
                 </div>
-                <div className={"cube-old-settings"}>
-                    <label>side
-                        <select id={"settings_side_measures"} multiple={true}>
-                            {this.state.list_measures_side.map((name, key) => {
-                                return <option value={name} key={key}>{name}</option>
-                            })}
-                        </select>
-                    </label>
-                    <label>
-                        <div className="cube-old-settings-button" onClick={this.settings_up} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-up"}/></div>
-                        <div className="cube-old-settings-button" onClick={this.settings_left} style={{marginBottom: "5px"}}><FontAwesomeIcon icon={"caret-left"}/></div>
-                        <div className="cube-old-settings-button" onClick={this.settings_right}>                              <FontAwesomeIcon icon={"caret-right"}/></div>
-                    </label>
-                    <label>head
-                        <select id={"settings_head_measures"} multiple={true}>
-                            {this.state.list_measures_head.map((name, key) => {
-                                return <option value={name} key={key}>{name}</option>
-                            })}
-                        </select>
-                    </label>
-                </div>
             </div>
         );
     }
