@@ -1,4 +1,9 @@
 .cube-settings {
   display: flex;
   margin-bottom: 15px;
+  &-table {
+    border: $border;
+    padding: 10px;
+    margin: 0 auto;
+  }
 }

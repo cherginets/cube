@@ -1,7 +1,7 @@
 // SETTINGS REDUCER
 
 const initialState = {
-    modal_show: false,
+    modal_show: true,
 };
 
 export default (state = initialState, action) => {

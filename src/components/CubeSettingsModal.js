@@ -14,7 +14,15 @@ class CubeSettingsModal extends Component {
 
         return <div className="cube-modal-overlay cube-settings-modal" onClick={this.props.settings_close_modal}>
             <div className="cube-modal" onClick={e => e.stopPropagation()}>
-                test
+                <table className={"cube-settings-table"}>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Side</th>
+                            <th>Position</th>
+                        </tr>
+                    </thead>
+                </table>
 
                 <FontAwesomeIcon className="cube-fa cube-modal-close" icon={'times'} title={"Close"}
                     onClick={this.props.settings_close_modal}
